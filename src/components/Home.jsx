@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { ChevronDown } from 'lucide-react'
 import Navbar from './Navbar'
 import ArchitecturePreview from './Architecture_preview'
+import Footer from './Footer'
 
 const Home = () => {
 const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -85,6 +86,7 @@ return ( <div className="min-h-screen bg-white"> <Navbar />
   </main>
 
   <ArchitecturePreview />
+  <Footer />
 </div>
 )
 }
