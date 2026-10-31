@@ -10,10 +10,6 @@ return ( <nav className='flex items-center justify-between border-b border-gray-
                 Home
             </Link>
 
-            <Link to='/architecture' className='text-sm font-medium text-gray-600 transition-colors hover:text-black'>
-                Architecture
-            </Link>
-
             <Link to='/pipeline' className='text-sm font-medium text-gray-600 transition-colors hover:text-black'>
                 DevOps
             </Link>
@@ -24,13 +20,6 @@ return ( <nav className='flex items-center justify-between border-b border-gray-
 
             <Link to='/about' className='text-sm font-medium text-gray-600 transition-colors hover:text-black'>
                 About
-            </Link>
-
-            <Link
-                to='/architecture'
-                className='rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-700'
-            >
-                Start Building
             </Link>
         </div>
     </nav>
