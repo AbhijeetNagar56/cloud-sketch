@@ -1,45 +1,45 @@
 import React from 'react'
-import ReactFlow, {ReactFlowProvider,Background,BackgroundVariant,Handle,Position,MarkerType} from 'reactflow'
+import ReactFlow, { ReactFlowProvider, Background, BackgroundVariant, Handle, Position, MarkerType } from 'reactflow'
 import 'reactflow/dist/style.css'
 
-import {Monitor,Network,Server,Database,HardDrive} from 'lucide-react'
+import { Monitor, Network, Server, Database, HardDrive } from 'lucide-react'
 
 const components = {
-frontend: {
-label: 'Frontend',
-technology: 'React',
-icon: Monitor,
-color: '#2563eb',
-background: '#eff6ff',
-},
-loadbalancer: {
-label: 'Load Balancer',
-technology: 'NGINX',
-icon: Network,
-color: '#0891b2',
-background: '#ecfeff',
-},
-backend: {
-label: 'Backend',
-technology: 'Node.js',
-icon: Server,
-color: '#059669',
-background: '#ecfdf5',
-},
-database: {
-label: 'Database',
-technology: 'PostgreSQL',
-icon: Database,
-color: '#7c3aed',
-background: '#f5f3ff',
-},
-bucket: {
-label: 'Storage Bucket',
-technology: 'AWS S3',
-icon: HardDrive,
-color: '#ea580c',
-background: '#fff7ed',
-},
+  frontend: {
+    label: 'Frontend',
+    technology: 'React',
+    icon: Monitor,
+    color: '#2563eb',
+    background: '#eff6ff',
+  },
+  loadbalancer: {
+    label: 'Load Balancer',
+    technology: 'NGINX',
+    icon: Network,
+    color: '#0891b2',
+    background: '#ecfeff',
+  },
+  backend: {
+    label: 'Backend',
+    technology: 'Node.js',
+    icon: Server,
+    color: '#059669',
+    background: '#ecfdf5',
+  },
+  database: {
+    label: 'Database',
+    technology: 'PostgreSQL',
+    icon: Database,
+    color: '#7c3aed',
+    background: '#f5f3ff',
+  },
+  bucket: {
+    label: 'Storage Bucket',
+    technology: 'AWS S3',
+    icon: HardDrive,
+    color: '#ea580c',
+    background: '#fff7ed',
+  },
 }
 
 function PreviewNode({ data }) {
@@ -49,7 +49,7 @@ function PreviewNode({ data }) {
     <div
       className="relative flex w-[145px] items-center gap-2 rounded-lg border bg-white p-2 shadow-sm"
       style={{ borderColor: data.color }}
->
+    >
 
       {/* Incoming connection point */}
       <Handle
@@ -84,12 +84,11 @@ function PreviewNode({ data }) {
         className="!h-2 !w-2 !border-0 !bg-slate-400"
       />
 
-    
     </div>
   )
 }
 
-const nodeTypes = {preview: PreviewNode}
+const nodeTypes = { preview: PreviewNode }
 
 const makeNode = (id, type, position) => ({
   id,
@@ -107,49 +106,59 @@ const initialNodes = [
 ]
 
 const initialEdges = [
-  { id: 'e1-2', source: '1', target: '2', animated: true, style: { stroke: '#64748b', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b'} },
-  { id: 'e2-3', source: '2', target: '3', animated: true, style: { stroke: '#64748b', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b'} },
-  { id: 'e3-4', source: '3', target: '4', animated: true, style: { stroke: '#64748b', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b'} },
-  { id: 'e3-5', source: '3', target: '5', animated: true, style: { stroke: '#64748b', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b'} },
+  { id: 'e1-2', source: '1', target: '2', animated: true, style: { stroke: '#64748b', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b' } },
+  { id: 'e2-3', source: '2', target: '3', animated: true, style: { stroke: '#64748b', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b' } },
+  { id: 'e3-4', source: '3', target: '4', animated: true, style: { stroke: '#64748b', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b' } },
+  { id: 'e3-5', source: '3', target: '5', animated: true, style: { stroke: '#64748b', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b' } },
 ]
 
 function PreviewCanvas() {
-return ( <section className="mx-auto mt-12 max-w-5xl px-4 pb-12"> <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"> <div className="h-[290px] w-full bg-slate-50 sm:h-[320px]">
-<ReactFlow
-    nodes={initialNodes}
-    edges={initialEdges}
-    nodeTypes={nodeTypes}
-    nodesDraggable={false}
-    nodesConnectable={false}
-    elementsSelectable={false}
-    zoomOnScroll={false}
-    zoomOnDoubleClick={false}
-    panOnDrag={false}
-    preventScrolling
-    fitView
-    fitViewOptions={{ padding: 0.12, maxZoom: 1 }}
-    proOptions={{ hideAttribution: true }}
-> <Background
-    variant={BackgroundVariant.Dots}
-    gap={16}
-    size={1}
-    color="#cbd5e1"
-    /> </ReactFlow> </div>
+  return (
+    <section className="mx-auto mt-12 w-auto px-4 pb-12">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+        <div className="h-[290px] w-full bg-slate-50 sm:h-[320px]">
+          <ReactFlow
+            nodes={initialNodes}
+            edges={initialEdges}
+            nodeTypes={nodeTypes}
+            nodesDraggable={false}
+            nodesConnectable={false}
+            elementsSelectable={false}
+            zoomOnScroll={false}
+            zoomOnDoubleClick={false}
+            panOnDrag={false}
+            preventScrolling
+            fitView
+            fitViewOptions={{ padding: 0.12, maxZoom: 0.5 }}
+            proOptions={{ hideAttribution: true }}
+          >
+            <Background
+              variant={BackgroundVariant.Dots}
+              gap={16}
+              size={1}
+              color="#cbd5e1"
+            />
+          </ReactFlow>
+        </div>
 
-    <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3">
-      <p className="text-xs text-slate-500">
-        Preview Example Designed with CloudSketch
-      </p>
-      <p className="text-xs text-slate-500">
-        5 components · 4 connections
-      </p>
-    </div>
-  </div>
-</section>
-)
+        <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3">
+          <p className="text-xs text-slate-500">
+            Preview Example Designed with CloudSketch
+          </p>
+          <p className="text-xs text-slate-500">
+            5 components · 4 connections
+          </p>
+        </div>
+      </div>
+    </section>
+  )
 }
 
 
 export default function ArchitecturePreview() {
-return ( <ReactFlowProvider> <PreviewCanvas /> </ReactFlowProvider>)
+  return (
+    <ReactFlowProvider>
+      <PreviewCanvas />
+    </ReactFlowProvider>
+  )
 }
