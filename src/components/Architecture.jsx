@@ -19,7 +19,6 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import { toPng } from 'html-to-image';
 import {
-  Cloud,
   Monitor,
   Server,
   Database,
@@ -32,7 +31,9 @@ import {
   Lock,
   Download,
   Trash2,
+  ArrowLeft,
 } from 'lucide-react';
+import { Link } from 'react-router';
 
 /* ---------- Component catalog (sidebar items + per-node dropdown options) ---------- */
 const CATALOG = {
@@ -271,12 +272,12 @@ function Canvas() {
           fitView
         >
           <Panel position="top-left">
-            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[17px] font-bold tracking-tight">
-              <Cloud size={20} className="text-blue-600" />
-              CloudSketch
-            </div>
+            <Link to="/"><ArrowLeft className="inline" /><span className="font-bold">Back</span></Link>
           </Panel>
           <Panel position="top-right" className="flex gap-2">
+            <button className={btnPrimary} onClick={() => alert('Save View feature is not implemented yet.')}>
+              <Layers size={15} /> Save View
+            </button>
             <button className={btnPrimary} onClick={exportPng}>
               <Download size={15} /> Export PNG
             </button>
