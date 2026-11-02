@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactFlow, {
   ReactFlowProvider,
   MiniMap,
@@ -19,7 +19,6 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import { toPng } from 'html-to-image';
 import {
-  Cloud,
   Monitor,
   Server,
   Database,
@@ -32,7 +31,12 @@ import {
   Lock,
   Download,
   Trash2,
+  ArrowLeft,
+  Save,
+  FolderOpen,
+  FilePlus,
 } from 'lucide-react';
+import { Link } from 'react-router';
 
 /* ---------- Component catalog (sidebar items + per-node dropdown options) ---------- */
 const CATALOG = {
@@ -62,6 +66,50 @@ const btn =
 const btnPrimary = `${btn} border-blue-600 bg-blue-600 text-white hover:bg-blue-700`;
 const btnGhost = `${btn} border-slate-300 bg-white text-slate-700 hover:bg-slate-100`;
 const iconBox = 'grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[color:var(--c)]';
+
+/* ---------- Local storage helpers (projects live in the browser only) ---------- */
+const STORE_KEY = 'cloudsketch:projects'; // saved projects: [{ id, name, updatedAt, nodes, edges }]
+const DRAFT_KEY = 'cloudsketch:draft'; // work in progress, restored after a refresh
+const DEFAULT_NAME = 'Untitled diagram';
+
+const readStore = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const writeStore = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch {
+    return false; // storage full or blocked
+  }
+};
+
+/* Keep only what is needed to rebuild a diagram (drops selection, sizes, etc.) */
+const slim = (nodes, edges) => ({
+  nodes: nodes.map(({ id, type, position, data }) => ({
+    id,
+    type,
+    position: { x: Math.round(position.x), y: Math.round(position.y) },
+    data,
+  })),
+  edges: edges.map(({ id, source, target, sourceHandle, targetHandle }) => ({
+    id,
+    source,
+    target,
+    sourceHandle,
+    targetHandle,
+  })),
+});
+
+const makeSig = (nodes, edges, name) => JSON.stringify([slim(nodes, edges), name.trim()]);
+const nextIdFrom = (nodes) => Math.max(100, ...nodes.map((n) => parseInt(n.id.replace(/\D/g, ''), 10) || 0)) + 1;
+const formatTime = (t) => new Date(t).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
 
 /* ---------- Custom node ---------- */
 function ServiceNode({ id, data, selected }) {
@@ -139,6 +187,8 @@ const initialEdges = [
   { id: 'e3-5', source: '3', target: '5', sourceHandle: 'right', targetHandle: 'left' },
 ];
 
+const SAMPLE_SIG = makeSig(initialNodes, initialEdges, DEFAULT_NAME);
+
 const defaultEdgeOptions = {
   animated: true,
   style: { stroke: '#64748b', strokeWidth: 2 },
@@ -192,6 +242,120 @@ function Canvas() {
   const nextId = useRef(100);
   const rf = useReactFlow();
 
+  // Project state
+  const [projects, setProjects] = useState([]);
+  const [currentId, setCurrentId] = useState(null); // null = not saved as a project yet
+  const [name, setName] = useState(DEFAULT_NAME);
+  const [savedSig, setSavedSig] = useState(SAMPLE_SIG); // snapshot of the last saved/opened state
+  const [ready, setReady] = useState(false); // true once the draft has been restored
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [toast, setToast] = useState('');
+
+  const sig = useMemo(() => makeSig(nodes, edges, name), [nodes, edges, name]);
+  const dirty = sig !== savedSig;
+
+  const flash = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 1800);
+  };
+
+  /* Replace the canvas with a diagram (new, opened or restored) */
+  const loadDiagram = useCallback(
+    ({ nodes: n, edges: e, name: nm, id }) => {
+      setNodes(n);
+      setEdges(e);
+      setName(nm);
+      setCurrentId(id);
+      setSavedSig(makeSig(n, e, nm));
+      nextId.current = nextIdFrom(n);
+      setTimeout(() => rf.fitView({ padding: 0.2 }), 50);
+    },
+    [rf, setNodes, setEdges]
+  );
+
+  /* On first load: read saved projects and restore the last draft */
+  useEffect(() => {
+    setProjects(readStore(STORE_KEY, []));
+    const d = readStore(DRAFT_KEY, null);
+    if (d && Array.isArray(d.nodes)) {
+      setNodes(d.nodes);
+      setEdges(d.edges || []);
+      setName(d.name || DEFAULT_NAME);
+      setCurrentId(d.currentId || null);
+      setSavedSig(d.savedSig ?? '');
+      nextId.current = nextIdFrom(d.nodes);
+      setTimeout(() => rf.fitView({ padding: 0.2 }), 50);
+    }
+    setReady(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* Autosave the work in progress so a refresh never loses it */
+  useEffect(() => {
+    if (!ready) return;
+    const t = setTimeout(() => {
+      writeStore(DRAFT_KEY, { ...slim(nodes, edges), name, currentId, savedSig });
+    }, 400);
+    return () => clearTimeout(t);
+  }, [ready, nodes, edges, name, currentId, savedSig]);
+
+  const saveProject = () => {
+    const id = currentId || `p${Date.now()}`;
+    const finalName = name.trim() || DEFAULT_NAME;
+    const project = { id, name: finalName, updatedAt: Date.now(), ...slim(nodes, edges) };
+    const list = [project, ...readStore(STORE_KEY, []).filter((p) => p.id !== id)];
+    if (!writeStore(STORE_KEY, list)) {
+      flash('Could not save: browser storage is full');
+      return;
+    }
+    setProjects(list);
+    setCurrentId(id);
+    setName(finalName);
+    setSavedSig(makeSig(nodes, edges, finalName));
+    flash('Saved');
+  };
+
+  const confirmDiscard = () => !dirty || nodes.length === 0 || window.confirm('You have unsaved changes. Discard them?');
+
+  const newProject = () => {
+    if (!confirmDiscard()) return;
+    loadDiagram({ nodes: [], edges: [], name: DEFAULT_NAME, id: null });
+    setMenuOpen(false);
+  };
+
+  const openProject = (p) => {
+    if (p.id !== currentId && !confirmDiscard()) return;
+    loadDiagram({ nodes: p.nodes, edges: p.edges, name: p.name, id: p.id });
+    setMenuOpen(false);
+  };
+
+  const deleteProject = (p) => {
+    if (!window.confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
+    const list = readStore(STORE_KEY, []).filter((x) => x.id !== p.id);
+    writeStore(STORE_KEY, list);
+    setProjects(list);
+    if (p.id === currentId) {
+      setCurrentId(null); // the diagram stays on screen as an unsaved draft
+      setSavedSig('');
+    }
+  };
+
+  /* Ctrl/Cmd + S saves, Escape closes the projects menu */
+  const saveRef = useRef(saveProject);
+  saveRef.current = saveProject;
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        saveRef.current();
+      } else if (e.key === 'Escape') {
+        setMenuOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
   const addNode = useCallback(
@@ -236,6 +400,7 @@ function Canvas() {
     const height = 1000;
     const rect = getRectOfNodes(nodes);
     const [x, y, zoom] = getTransformForBounds(rect, width, height, 0.5, 2);
+    const fileName = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'cloudsketch-diagram';
     toPng(wrapper.current.querySelector('.react-flow__viewport'), {
       backgroundColor: '#f8fafc',
       width,
@@ -243,7 +408,7 @@ function Canvas() {
       style: { width: `${width}px`, height: `${height}px`, transform: `translate(${x}px, ${y}px) scale(${zoom})` },
     }).then((url) => {
       const a = document.createElement('a');
-      a.download = 'cloudsketch-diagram.png';
+      a.download = `${fileName}.png`;
       a.href = url;
       a.click();
     });
@@ -253,6 +418,10 @@ function Canvas() {
     setNodes([]);
     setEdges([]);
   };
+
+  const recent = useMemo(() => [...projects].sort((a, b) => b.updatedAt - a.updatedAt), [projects]);
+  const status = !currentId ? 'Not saved' : dirty ? 'Unsaved changes' : 'Saved';
+  const statusColor = !currentId || dirty ? 'text-amber-600' : 'text-emerald-600';
 
   return (
     <div className="flex h-screen w-screen bg-slate-50 font-sans text-slate-900">
@@ -270,20 +439,78 @@ function Canvas() {
           defaultEdgeOptions={defaultEdgeOptions}
           fitView
         >
-          <Panel position="top-left">
-            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[17px] font-bold tracking-tight">
-              <Cloud size={20} className="text-blue-600" />
-              CloudSketch
+          <Panel position="top-left" className="flex items-center gap-2">
+            <Link to="/" className={`${btnGhost} no-underline`}>
+              <ArrowLeft size={15} />
+            </Link>
+            <div className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5">
+              <input
+                className="w-44 bg-transparent text-[13px] font-semibold text-slate-900 focus:outline-none"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Project name"
+                aria-label="Project name"
+              />
+              <span className={`whitespace-nowrap text-[11px] font-semibold ${statusColor}`}>{status}</span>
             </div>
           </Panel>
+
           <Panel position="top-right" className="flex gap-2">
+            <button className={btnPrimary} onClick={saveProject} title="Ctrl/Cmd + S">
+              <Save size={15} /> Save
+            </button>
             <button className={btnPrimary} onClick={exportPng}>
               <Download size={15} /> Export PNG
             </button>
             <button className={btnGhost} onClick={clearAll}>
               <Trash2 size={15} /> Clear
             </button>
+
+            {menuOpen && (
+              <div className="nopan nowheel absolute right-0 top-full z-10 mt-2 w-80 rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
+                <p className="px-2 pb-1 pt-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Recent projects</p>
+                {recent.length === 0 ? (
+                  <p className="px-2 py-4 text-center text-[12.5px] text-slate-500">
+                    No saved projects yet. Press Save to keep this diagram.
+                  </p>
+                ) : (
+                  <ul className="max-h-72 overflow-y-auto">
+                    {recent.map((p) => (
+                      <li
+                        key={p.id}
+                        className={`flex items-center gap-2 rounded-lg px-2 py-2 hover:bg-slate-100 ${
+                          p.id === currentId ? 'bg-blue-50' : ''
+                        }`}
+                      >
+                        <button className="min-w-0 flex-1 cursor-pointer text-left" onClick={() => openProject(p)}>
+                          <span className="block truncate text-[13px] font-semibold">{p.name}</span>
+                          <span className="block text-[11.5px] text-slate-500">
+                            {p.nodes.length} components · {formatTime(p.updatedAt)}
+                          </span>
+                        </button>
+                        <button
+                          className="cursor-pointer rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                          onClick={() => deleteProject(p)}
+                          aria-label={`Delete ${p.name}`}
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
           </Panel>
+
+          <Panel position="bottom-center">
+            {toast && (
+              <div role="status" className="rounded-lg bg-slate-900 px-3 py-2 text-[13px] font-semibold text-white shadow-lg">
+                {toast}
+              </div>
+            )}
+          </Panel>
+
           <MiniMap pannable zoomable />
           <Controls />
           <Background gap={20} />
