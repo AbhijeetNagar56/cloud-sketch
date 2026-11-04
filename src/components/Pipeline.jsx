@@ -1,3 +1,4 @@
+import { useCallback, useRef } from 'react';
 import ReactFlow, {
   ReactFlowProvider,
   Handle,
@@ -7,6 +8,7 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   useReactFlow,
+  addEdge,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import {
@@ -36,6 +38,7 @@ const CATALOG = {
   notify: { label: 'Notify', icon: Bell, color: '#e11d48', options: ['Slack', 'Email', 'Discord'] },
 };
 
+const DRAG_TYPE = 'application/cloudsketch';
 const HANDLES = [
   ['top', Position.Top],
   ['right', Position.Right],
@@ -127,25 +130,112 @@ const defaultEdgeOptions = {
   markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b' },
 };
 
+/* ---------- Sidebar ---------- */
+function Sidebar({ onAdd }) {
+  return (
+    <aside className="w-[200px] shrink-0 overflow-y-auto border-l border-slate-200 bg-white px-4 py-[18px] md:w-[268px]">
+      <h2 className="mb-0.5 text-base font-semibold">Pipeline stages</h2>
+      <p className="mb-3.5 text-[12.5px] leading-snug text-slate-500">Drag onto the canvas, or click to add.</p>
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+        {Object.entries(CATALOG).map(([kind, meta]) => {
+          const Icon = meta.icon;
+          return (
+            <div
+              key={kind}
+              style={{ '--c': meta.color }}
+              className="flex cursor-grab select-none flex-col items-center gap-[7px] rounded-xl border border-slate-200 bg-slate-50 px-1.5 py-3 text-center text-xs font-semibold hover:border-[color:var(--c)] hover:bg-white active:cursor-grabbing focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              draggable
+              role="button"
+              tabIndex={0}
+              aria-label={`Add ${meta.label} stage`}
+              onDragStart={(e) => {
+                e.dataTransfer.setData(DRAG_TYPE, kind);
+                e.dataTransfer.effectAllowed = 'move';
+              }}
+              onClick={() => onAdd(kind)}
+              onKeyDown={(e) => e.key === 'Enter' && onAdd(kind)}
+            >
+              <span className={iconBox}>
+                <Icon size={18} color="#fff" />
+              </span>
+              {meta.label}
+            </div>
+          );
+        })}
+      </div>
+      <p className="mt-4 text-[12.5px] leading-snug text-slate-500">
+        Connect stages by dragging from one dot to another. Select a stage or arrow and press Backspace or Delete to
+        remove it.
+      </p>
+    </aside>
+  );
+}
+
 /* ---------- Canvas ---------- */
 function Canvas() {
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const wrapper = useRef(null);
+  const nextId = useRef(100);
+  const rf = useReactFlow();
+
+  const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+
+  const addNode = useCallback(
+    (kind, position) => {
+      const pos =
+        position ||
+        (() => {
+          const b = wrapper.current.getBoundingClientRect();
+          const jitter = (nextId.current % 5) * 24;
+          return rf.screenToFlowPosition
+            ? rf.screenToFlowPosition({ x: b.left + b.width / 2 + jitter, y: b.top + b.height / 2 + jitter })
+            : rf.project({ x: b.width / 2 + jitter, y: b.height / 2 + jitter });
+        })();
+      setNodes((nds) => nds.concat(makeNode(`n${nextId.current++}`, kind, pos)));
+    },
+    [rf, setNodes]
+  );
+
+  const onDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  }, []);
+
+  const onDrop = useCallback(
+    (e) => {
+      e.preventDefault();
+      const kind = e.dataTransfer.getData(DRAG_TYPE);
+      if (!CATALOG[kind]) return;
+      const raw = { x: e.clientX, y: e.clientY };
+      const bounds = wrapper.current.getBoundingClientRect();
+      const pos = rf.screenToFlowPosition
+        ? rf.screenToFlowPosition(raw)
+        : rf.project({ x: raw.x - bounds.left, y: raw.y - bounds.top });
+      addNode(kind, { x: pos.x - 85, y: pos.y - 30 });
+    },
+    [rf, addNode]
+  );
 
   return (
     <div className="flex h-screen w-screen bg-slate-50 font-sans text-slate-900">
-      <div className="relative min-w-0 flex-1">
+      <div className="relative min-w-0 flex-1" ref={wrapper}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onDrop={onDrop}
+          onDragOver={onDragOver}
           connectionMode={ConnectionMode.Loose}
           defaultEdgeOptions={defaultEdgeOptions}
+          deleteKeyCode={['Backspace', 'Delete']}
           fitView
         />
       </div>
+      <Sidebar onAdd={(kind) => addNode(kind)} />
     </div>
   );
 }
