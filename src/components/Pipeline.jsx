@@ -32,8 +32,9 @@ import {
   Download,
   Trash2,
   ArrowLeft,
+  Save,
 } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 
 /* ---------- Stage catalog (sidebar items + per-node dropdown options) ---------- */
 const CATALOG = {
@@ -63,6 +64,17 @@ const btn =
 const btnPrimary = `${btn} border-blue-600 bg-blue-600 text-white hover:bg-blue-700`;
 const btnGhost = `${btn} border-slate-300 bg-white text-slate-700 hover:bg-slate-100`;
 const iconBox = 'grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[color:var(--c)]';
+
+/* Saved pipelines live in their own list, separate from architecture diagrams (Saved.jsx reads both) */
+const PIPELINE_KEY = 'cloudsketch:pipelines';
+
+const readPipelines = () => {
+  try {
+    return JSON.parse(localStorage.getItem(PIPELINE_KEY)) || [];
+  } catch {
+    return [];
+  }
+};
 
 /* ---------- Custom node ---------- */
 function StageNode({ id, data, selected }) {
@@ -189,9 +201,15 @@ function Sidebar({ onAdd }) {
 
 /* ---------- Canvas ---------- */
 function Canvas() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [name, setName] = useState('');
+  // Opened from the Saved page as /pipeline?project=<id>? Then start from that pipeline instead of the sample.
+  const [params] = useSearchParams();
+  const [opened] = useState(() => readPipelines().find((p) => p.id === params.get('project')));
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(opened ? opened.nodes : initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(opened ? opened.edges : initialEdges);
+  const [name, setName] = useState(opened ? opened.name : '');
+  const [projectId, setProjectId] = useState(opened ? opened.id : null);
+  const [justSaved, setJustSaved] = useState(false);
   const wrapper = useRef(null);
   const nextId = useRef(100);
   const rf = useReactFlow();
@@ -209,7 +227,8 @@ function Canvas() {
             ? rf.screenToFlowPosition({ x: b.left + b.width / 2 + jitter, y: b.top + b.height / 2 + jitter })
             : rf.project({ x: b.width / 2 + jitter, y: b.height / 2 + jitter });
         })();
-      setNodes((nds) => nds.concat(makeNode(`n${nextId.current++}`, kind, pos)));
+      // time + counter, so a new id never clashes with an id inside an opened saved pipeline
+      setNodes((nds) => nds.concat(makeNode(`n${Date.now()}-${nextId.current++}`, kind, pos)));
     },
     [rf, setNodes]
   );
@@ -260,6 +279,30 @@ function Canvas() {
     setEdges([]);
   };
 
+  const savePipeline = () => {
+    const pipelineId = projectId || `pl${Date.now()}`;
+    const pipeline = {
+      id: pipelineId,
+      type: 'pipeline',
+      name: name.trim() || 'Untitled pipeline',
+      updatedAt: Date.now(),
+      // keep only what is needed to draw it again
+      nodes: nodes.map(({ id, type, position, data }) => ({ id, type, position, data })),
+      edges: edges.map(({ id, source, target, sourceHandle, targetHandle }) => ({ id, source, target, sourceHandle, targetHandle })),
+    };
+    // replace the old copy of this pipeline (if any) and put it first
+    const list = [pipeline, ...readPipelines().filter((p) => p.id !== pipelineId)];
+    try {
+      localStorage.setItem(PIPELINE_KEY, JSON.stringify(list));
+    } catch {
+      alert('Could not save: browser storage is full.');
+      return;
+    }
+    setProjectId(pipelineId);
+    setJustSaved(true);
+    setTimeout(() => setJustSaved(false), 1500);
+  };
+
   return (
     <div className="flex h-screen w-screen bg-slate-50 font-sans text-slate-900">
       <div className="relative min-w-0 flex-1" ref={wrapper}>
@@ -293,6 +336,9 @@ function Canvas() {
           </Panel>
 
           <Panel position="top-right" className="flex gap-2">
+            <button className={btnPrimary} onClick={savePipeline}>
+              <Save size={15} /> {justSaved ? 'Saved!' : 'Save'}
+            </button>
             <button className={btnPrimary} onClick={exportPng}>
               <Download size={15} /> Export PNG
             </button>
