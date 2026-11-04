@@ -1,265 +1,331 @@
-
 import React from 'react'
 import { Link } from 'react-router'
 import {
-  Cloud,
-  Target,
-  Lightbulb,
-  Workflow,
-  Layers,
-  LayoutDashboard,
   ArrowRight,
-  GitBranch,
-  CheckCircle2,
-  Sparkles
+  Cloud,
+  Code2,
+  Compass,
+  Eye,
+  GraduationCap,
+  Layers3,
+  Lightbulb,
+  Network,
+  Rocket,
+  Target,
+  Workflow,
 } from 'lucide-react'
 
 import Navbar from './Navbar'
 import Footer from './Footer'
+import ArchitecturePreview from './Architecture_preview'
+
+const beliefs = [
+  {
+    icon: Lightbulb,
+    number: '01',
+    title: 'Simplicity',
+    description:
+      'Complex systems are easier to work with when the ideas behind them are easy to see.',
+  },
+  {
+    icon: Eye,
+    number: '02',
+    title: 'Clarity',
+    description:
+      'Every component and connection should help explain how a system fits together.',
+  },
+  {
+    icon: Target,
+    number: '03',
+    title: 'Better planning',
+    description:
+      'Taking time to think through an architecture gives development a clearer starting point.',
+  },
+]
+
+const capabilities = [
+  {
+    icon: Layers3,
+    title: 'Design your architecture',
+    description:
+      'Add the building blocks of an application to a visual canvas and arrange them around your system.',
+  },
+  {
+    icon: Network,
+    title: 'Show how things connect',
+    description:
+      'Connect services, databases, and storage to make the relationships in your design easier to understand.',
+  },
+  {
+    icon: Workflow,
+    title: 'Keep and share your work',
+    description:
+      'Save architecture projects in your browser and export a diagram as a PNG when you need to share it.',
+  },
+]
+
+const audiences = [
+  {
+    icon: Code2,
+    title: 'Software developers',
+    description: 'Map application components before writing the code.',
+  },
+  {
+    icon: Cloud,
+    title: 'Cloud engineers',
+    description: 'Think through services and infrastructure connections.',
+  },
+  {
+    icon: Network,
+    title: 'System architects',
+    description: 'Communicate system structure with a visual plan.',
+  },
+  {
+    icon: GraduationCap,
+    title: 'Students and learners',
+    description: 'Explore how application components work together.',
+  },
+  {
+    icon: Rocket,
+    title: 'Startup teams',
+    description: 'Give early product ideas a more organized structure.',
+  },
+]
+
+const approach = [
+  {
+    number: '01',
+    title: 'Think',
+    description: 'Start with the problem and understand what your system needs to do.',
+  },
+  {
+    number: '02',
+    title: 'Sketch',
+    description: 'Place the components your application depends on onto the canvas.',
+  },
+  {
+    number: '03',
+    title: 'Visualize',
+    description: 'Connect the pieces and see how the parts of your system relate.',
+  },
+  {
+    number: '04',
+    title: 'Build',
+    description: 'Use the diagram as a reference as you move into implementation.',
+  },
+]
+
+function SectionLabel({ children }) {
+  return (
+    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
+      {children}
+    </p>
+  )
+}
 
 const About = () => {
-  const features = [
-    {
-      icon: <LayoutDashboard size={26} />,
-      title: 'Architecture Design',
-      description:
-        'Create and organize cloud infrastructure diagrams visually. Build clear representations of your system architecture.',
-    },
-    {
-      icon: <Workflow size={26} />,
-      title: 'Visualize Workflows',
-      description:
-        'Connect services and understand how different components interact within your cloud infrastructure.',
-    },
-    {
-      icon: <Layers size={26} />,
-      title: 'Project Management',
-      description:
-        'Keep your architecture projects organized and access your saved designs whenever you need them.',
-    },
-  ]
-
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white text-slate-900">
       <Navbar />
 
       <main>
-        {/* HERO SECTION */}
-        <section className="px-6 py-24 text-center sm:py-28">
-          <div className="mx-auto max-w-4xl">
-
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600">
-              <Cloud size={17} />
-              ABOUT CLOUDSKETCH
-            </div>
-
-            <h1 className="text-4xl font-bold leading-tight tracking-tight text-gray-900 sm:text-6xl">
-              Design Cloud Architecture.
-              <span className="block text-blue-600">
-                Think Without Limits.
-              </span>
-            </h1>
-
-            <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-gray-600">
-              CloudSketch makes cloud architecture planning simple.
-              Design, connect, and visualize your infrastructure
-              in one intuitive workspace.
-            </p>
-
-            <div className="mt-10 flex flex-wrap justify-center gap-4">
-              <Link
-                to="/architecture"
-                className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-6 py-3 font-semibold text-white transition hover:bg-gray-700"
-              >
-                Explore Architecture Builder
-                <ArrowRight size={18} />
-              </Link>
-
-              <Link
-                to="/pipeline"
-                className="rounded-lg border border-gray-300 px-6 py-3 font-semibold text-gray-700 transition hover:bg-gray-100"
-              >
-                Explore Pipeline
-              </Link>
-            </div>
-
-          </div>
-        </section>
-
-        {/* OUR STORY SECTION */}
-        <section className="border-y border-gray-100 bg-gray-50 px-6 py-20">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-2">
-
-            <div>
-              <p className="mb-4 text-sm font-bold uppercase tracking-widest text-blue-600">
-                Our Story
+        {/* HERO */}
+        <section className="border-b border-slate-200 bg-slate-50 px-5 py-16 sm:px-8 sm:py-20 lg:py-24">
+          <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[0.88fr_1.12fr] lg:gap-10">
+            <div className="max-w-2xl">
+              <SectionLabel>Why CloudSketch?</SectionLabel>
+              <h1 className="mt-5 text-4xl font-semibold leading-[1.12] tracking-tight text-slate-950 sm:text-5xl lg:text-[3.65rem]">
+                Good Architecture Starts With a Clear Vision.
+              </h1>
+              <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">
+                Cloud Sketch helps developers turn complex system architecture ideas into clear, structured visual designs. We believe planning a system should be as intuitive as building one.
               </p>
 
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                Turning Complex Ideas Into Clear Architecture.
-              </h2>
-
-              <p className="mt-6 leading-8 text-gray-600">
-                Designing cloud infrastructure can become complicated
-                when multiple services, connections, and deployment
-                components are involved.
-              </p>
-
-              <p className="mt-4 leading-8 text-gray-600">
-                CloudSketch is designed to make this process more
-                intuitive by providing a visual workspace where
-                developers can plan, connect, and understand their
-                cloud architecture before deployment.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-
-              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                <Lightbulb size={30} />
-              </div>
-
-              <h3 className="text-xl font-bold text-gray-900">
-                From Ideas to Infrastructure
-              </h3>
-
-              <p className="mt-3 leading-7 text-gray-600">
-                A clear visual representation helps developers
-                understand system components, identify connections,
-                and plan their infrastructure with greater confidence.
-              </p>
-
-              <div className="mt-7 space-y-4">
-                {[
-                  'Plan your architecture',
-                  'Connect system components',
-                  'Visualize deployment workflows',
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-3">
-                    <CheckCircle2
-                      size={19}
-                      className="shrink-0 text-blue-600"
-                    />
-                    <span className="text-sm font-medium text-gray-700">
-                      {item}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* OUR MISSION SECTION */}
-        <section className="px-6 py-20">
-          <div className="mx-auto max-w-4xl text-center">
-
-            <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-              <Target size={30} />
-            </div>
-
-            <p className="mb-4 text-sm font-bold uppercase tracking-widest text-blue-600">
-              Our Mission
-            </p>
-
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Making Cloud Architecture Simple for Everyone.
-            </h2>
-
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-600">
-              Our mission is to simplify the way developers plan and
-              understand cloud systems. We aim to make architecture
-              design more visual, accessible, and organized so that
-              great ideas can turn into well-structured systems.
-            </p>
-
-          </div>
-        </section>
-
-        {/* FEATURES SECTION */}
-        <section className="bg-gray-50 px-6 py-20">
-          <div className="mx-auto max-w-6xl">
-
-            <div className="mx-auto mb-14 max-w-2xl text-center">
-              <p className="mb-4 text-sm font-bold uppercase tracking-widest text-blue-600">
-                What We Offer
-              </p>
-
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                Everything You Need to Plan Better.
-              </h2>
-
-              <p className="mt-5 leading-7 text-gray-600">
-                Explore the tools that help you turn infrastructure
-                ideas into organized visual designs.
-              </p>
-            </div>
-
-            <div className="grid gap-7 md:grid-cols-3">
-
-              {features.map((feature) => (
-                <div
-                  key={feature.title}
-                  className="rounded-2xl border border-gray-200 bg-white p-8 transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg"
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <Link
+                  to="/architecture"
+                  className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
                 >
-                  <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                    {feature.icon}
-                  </div>
+                  Explore CloudSketch <ArrowRight size={16} />
+                </Link>
+                <a
+                  href="#our-story"
+                  className="rounded-md px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-white hover:text-slate-950"
+                >
+                  Get to know us
+                </a>
+              </div>
+              <p className="mt-7 text-xs font-medium tracking-wide text-slate-500">
+                A visual workspace for thinking through system design.
+              </p>
+            </div>
 
-                  <h3 className="text-xl font-bold text-gray-900">
-                    {feature.title}
-                  </h3>
-
-                  <p className="mt-4 leading-7 text-gray-600">
-                    {feature.description}
-                  </p>
-                </div>
-              ))}
-
+            <div className="min-w-0">
+              <ArchitecturePreview />
             </div>
           </div>
         </section>
 
-        {/* CALL TO ACTION SECTION */}
-        <section className="px-6 py-24">
-          <div className="mx-auto max-w-5xl rounded-3xl bg-gray-900 px-7 py-16 text-center sm:px-12">
-
-            <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-400">
-              <Sparkles size={30} />
+        {/* STORY */}
+        <section id="our-story" className="scroll-mt-8 px-5 py-20 sm:px-8 lg:py-24">
+          <div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-[1.05fr_0.95fr] lg:gap-20">
+            <div>
+              <SectionLabel>Our story</SectionLabel>
+              <h2 className="mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tight text-slate-950 sm:text-4xl">
+                An idea is only the beginning. A clear plan brings it together.
+              </h2>
+              <p className="mt-6 leading-8 text-slate-600">
+                Every great application starts with an idea, but turning that idea into a scalable system takes thoughtful planning. When components, services, and connections are difficult to keep track of, even a good idea can become hard to communicate.
+              </p>
+              <p className="mt-4 leading-8 text-slate-600">
+                We created CloudSketch to make architecture design easier to understand, organize, and communicate. Our goal is to help developers focus on building better systems rather than struggling with complicated planning processes.
+              </p>
             </div>
 
-            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Ready to Design Your Cloud Architecture?
-            </h2>
+            <div className="border-l-2 border-blue-600 bg-slate-50 px-7 py-8 sm:px-9 sm:py-10">
+              <p className="text-sm font-semibold text-slate-500">THE IDEA BEHIND CLOUDSKETCH</p>
+              <p className="mt-5 text-2xl font-medium leading-snug tracking-tight text-slate-900 sm:text-3xl">
+                Make the structure visible before the work gets complicated.
+              </p>
+              <div className="mt-8 grid grid-cols-2 gap-6 border-t border-slate-200 pt-6">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">See the parts</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">Bring services and resources into one view.</p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Understand the links</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">Show how the pieces of a system interact.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-            <p className="mx-auto mt-5 max-w-2xl leading-7 text-gray-300">
-              Bring your ideas to life. Start designing,
-              connecting, and visualizing your cloud infrastructure
-              with CloudSketch.
-            </p>
+        {/* WHAT WE DO */}
+        <section className="border-y border-slate-200 bg-slate-50 px-5 py-20 sm:px-8 lg:py-24">
+          <div className="mx-auto max-w-6xl">
+            <div className="max-w-2xl">
+              <SectionLabel>What we do</SectionLabel>
+              <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                From individual components to a system you can see.
+              </h2>
+              <p className="mt-5 leading-7 text-slate-600">
+                CloudSketch gives you a visual canvas to put application building blocks together, connect them, and keep a record of your designs.
+              </p>
+            </div>
 
-            <div className="mt-9 flex flex-wrap justify-center gap-4">
+            <div className="mt-12 divide-y divide-slate-200 border-y border-slate-200">
+              {capabilities.map((item, index) => {
+                const Icon = item.icon
+                return (
+                  <div key={item.title} className="grid gap-4 py-7 sm:grid-cols-[72px_1fr_1.15fr] sm:items-start sm:gap-8">
+                    <div className="flex items-center gap-3 sm:block">
+                      <span className="text-xs font-semibold tabular-nums text-slate-400">0{index + 1}</span>
+                      <span className="flex h-10 w-10 items-center justify-center rounded-md bg-white text-blue-700 ring-1 ring-slate-200 sm:mt-3">
+                        <Icon size={19} strokeWidth={1.8} />
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-slate-900">{item.title}</h3>
+                    <p className="max-w-xl text-sm leading-7 text-slate-600">{item.description}</p>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
 
-              <Link
-                to="/architecture"
-                className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-semibold text-gray-900 transition hover:bg-gray-200"
-              >
-                Start Building
-                <ArrowRight size={18} />
-              </Link>
+       
 
-              <Link
+        {/* MISSION & VISION */}
+        <section className="bg-slate-950 px-5 py-16 text-white sm:px-8 lg:py-20">
+          <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2 md:gap-20">
+            <div>
+              <div className="flex items-center gap-3 text-blue-300">
+                <Target size={20} />
+                <SectionLabel>Our mission</SectionLabel>
+              </div>
+              <h2 className="mt-5 text-2xl font-semibold leading-snug tracking-tight sm:text-3xl">
+                Make system architecture planning easier and more accessible.
+              </h2>
+              <p className="mt-4 max-w-lg leading-7 text-slate-300">
+                We want developers to have a straightforward way to design, organize, and understand the systems they are building.
+              </p>
+            </div>
+            <div className="border-t border-slate-700 pt-8 md:border-l md:border-t-0 md:pl-12 md:pt-0">
+              <div className="flex items-center gap-3 text-blue-300">
+                <Compass size={20} />
+                <SectionLabel>Our vision</SectionLabel>
+              </div>
+              <h2 className="mt-5 text-2xl font-semibold leading-snug tracking-tight sm:text-3xl">
+                Help developers build better-designed and more reliable systems.
+              </h2>
+              <p className="mt-4 max-w-lg leading-7 text-slate-300">
+                We believe clearer architecture plans can make it easier for people to discuss ideas and make thoughtful technical decisions.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* WHO WE BUILD FOR */}
+        <section className="px-5 py-20 sm:px-8 lg:py-24">
+          <div className="mx-auto max-w-6xl">
+            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+              <div>
+                <SectionLabel>Who we build for</SectionLabel>
+                <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                  For people who think in systems.
+                </h2>
+              </div>
+              <p className="max-w-md leading-7 text-slate-600">
+                Whether you are learning the fundamentals or planning an application, a visual design can help make the structure easier to discuss.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
+              {audiences.map((person) => {
+                const Icon = person.icon
+                return (
+                  <div key={person.title} className="flex gap-4 border-t border-slate-200 py-6">
+                    <Icon size={21} className="mt-1 shrink-0 text-blue-700" strokeWidth={1.8} />
+                    <div>
+                      <h3 className="font-semibold text-slate-900">{person.title}</h3>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">{person.description}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
+        
+
+        {/* CTA */}
+        <section className="px-5 py-20 sm:px-8 lg:py-24">
+          <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 border-b border-slate-200 pb-12 md:flex-row md:items-end">
+            <div className="max-w-2xl">
+              <SectionLabel>Start with an idea</SectionLabel>
+              <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                Your Next Great System Starts With a Sketch.
+              </h2>
+              <p className="mt-4 max-w-xl leading-7 text-slate-600">
+                Bring your ideas together, organize your architecture, and start building with clarity.
+              </p>
+            </div>
+            <Link
+              to="/architecture"
+              className="inline-flex shrink-0 items-center gap-2 rounded-md bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+            >
+              Explore CloudSketch <ArrowRight size={16} />
+            </Link>
+            <Link
                 to="/"
-                className="rounded-lg border border-gray-600 px-6 py-3 font-semibold text-white transition hover:bg-white/10"
+                className="rounded-lg border border-gray-600 px-6 py-3 font-semibold text-black transition  "
               >
                 Back to Home
               </Link>
-
-            </div>
           </div>
         </section>
-
       </main>
 
       <Footer />
@@ -268,4 +334,3 @@ const About = () => {
 }
 
 export default About
-
