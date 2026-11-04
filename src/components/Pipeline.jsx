@@ -14,7 +14,7 @@ import ReactFlow, {
   useReactFlow,
   addEdge,
   getRectOfNodes,
-  getTransformForBounds,
+  getTransformForBounds
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { toPng } from 'html-to-image';
@@ -32,11 +32,10 @@ import {
   Download,
   Trash2,
   ArrowLeft,
-  Save,
+  Save
 } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 
-/* ---------- Stage catalog (sidebar items + per-node dropdown options) ---------- */
 const CATALOG = {
   git: { label: 'Source Code', icon: GitBranch, color: '#f05032', options: ['GitHub', 'GitLab', 'Bitbucket'] },
   build: { label: 'Build', icon: Hammer, color: '#d97706', options: ['npm', 'Maven', 'Gradle', 'pip', 'Go build'] },
@@ -58,14 +57,13 @@ const HANDLES = [
   ['left', Position.Left],
 ];
 
-/* Shared Tailwind class strings */
 const btn =
   'inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-[13px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600';
 const btnPrimary = `${btn} border-blue-600 bg-blue-600 text-white hover:bg-blue-700`;
 const btnGhost = `${btn} border-slate-300 bg-white text-slate-700 hover:bg-slate-100`;
 const iconBox = 'grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[color:var(--c)]';
 
-/* Saved pipelines live in their own list, separate from architecture diagrams (Saved.jsx reads both) */
+
 const PIPELINE_KEY = 'cloudsketch:pipelines';
 
 const readPipelines = () => {
@@ -76,7 +74,6 @@ const readPipelines = () => {
   }
 };
 
-/* ---------- Custom node ---------- */
 function StageNode({ id, data, selected }) {
   const { setNodes } = useReactFlow();
   const meta = CATALOG[data.kind];
@@ -158,7 +155,6 @@ const defaultEdgeOptions = {
   markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b' },
 };
 
-/* ---------- Sidebar ---------- */
 function Sidebar({ onAdd }) {
   return (
     <aside className="w-[200px] shrink-0 overflow-y-auto border-l border-slate-200 bg-white px-4 py-[18px] md:w-[268px]">
@@ -199,9 +195,8 @@ function Sidebar({ onAdd }) {
   );
 }
 
-/* ---------- Canvas ---------- */
 function Canvas() {
-  // Opened from the Saved page as /pipeline?project=<id>? Then start from that pipeline instead of the sample.
+  
   const [params] = useSearchParams();
   const [opened] = useState(() => readPipelines().find((p) => p.id === params.get('project')));
 
@@ -213,6 +208,7 @@ function Canvas() {
   const wrapper = useRef(null);
   const nextId = useRef(100);
   const rf = useReactFlow();
+  const navigate = useNavigate();
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
@@ -227,7 +223,7 @@ function Canvas() {
             ? rf.screenToFlowPosition({ x: b.left + b.width / 2 + jitter, y: b.top + b.height / 2 + jitter })
             : rf.project({ x: b.width / 2 + jitter, y: b.height / 2 + jitter });
         })();
-      // time + counter, so a new id never clashes with an id inside an opened saved pipeline
+      
       setNodes((nds) => nds.concat(makeNode(`n${Date.now()}-${nextId.current++}`, kind, pos)));
     },
     [rf, setNodes]
@@ -286,11 +282,10 @@ function Canvas() {
       type: 'pipeline',
       name: name.trim() || 'Untitled pipeline',
       updatedAt: Date.now(),
-      // keep only what is needed to draw it again
       nodes: nodes.map(({ id, type, position, data }) => ({ id, type, position, data })),
       edges: edges.map(({ id, source, target, sourceHandle, targetHandle }) => ({ id, source, target, sourceHandle, targetHandle })),
     };
-    // replace the old copy of this pipeline (if any) and put it first
+
     const list = [pipeline, ...readPipelines().filter((p) => p.id !== pipelineId)];
     try {
       localStorage.setItem(PIPELINE_KEY, JSON.stringify(list));
@@ -321,9 +316,13 @@ function Canvas() {
           fitView
         >
           <Panel position="top-left" className="flex items-center gap-2">
-            <Link to="/" className={`${btnGhost} no-underline`} aria-label="Back to home">
+            <button
+              onClick={() => navigate(-1)}
+              className={btnGhost}
+              aria-label="Go back"
+            >
               <ArrowLeft size={15} />
-            </Link>
+            </button>
             <div className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5">
               <input
                 className="w-44 bg-transparent text-[13px] font-semibold text-slate-900 focus:outline-none"

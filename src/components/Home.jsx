@@ -75,12 +75,12 @@ const Home = () => {
               )}
             </div>
 
-            {/* Learn More button */}
+            {/* Saved Projects button */}
             <Link
-              to="/about"
+              to="/Saved"
               className="rounded-lg border border-gray-300 px-6 py-3 font-semibold text-gray-700 transition-colors hover:bg-gray-100"
             >
-              Learn More
+              Saved Projects
             </Link>
           </div>
         </div>
