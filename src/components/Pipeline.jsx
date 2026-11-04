@@ -1,6 +1,10 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import ReactFlow, {
   ReactFlowProvider,
+  MiniMap,
+  Controls,
+  Background,
+  Panel,
   Handle,
   Position,
   MarkerType,
@@ -9,8 +13,11 @@ import ReactFlow, {
   useEdgesState,
   useReactFlow,
   addEdge,
+  getRectOfNodes,
+  getTransformForBounds,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import { toPng } from 'html-to-image';
 import {
   GitBranch,
   Hammer,
@@ -22,7 +29,11 @@ import {
   Rocket,
   Activity,
   Bell,
+  Download,
+  Trash2,
+  ArrowLeft,
 } from 'lucide-react';
+import { Link } from 'react-router';
 
 /* ---------- Stage catalog (sidebar items + per-node dropdown options) ---------- */
 const CATALOG = {
@@ -46,6 +57,11 @@ const HANDLES = [
   ['left', Position.Left],
 ];
 
+/* Shared Tailwind class strings */
+const btn =
+  'inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-[13px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600';
+const btnPrimary = `${btn} border-blue-600 bg-blue-600 text-white hover:bg-blue-700`;
+const btnGhost = `${btn} border-slate-300 bg-white text-slate-700 hover:bg-slate-100`;
 const iconBox = 'grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[color:var(--c)]';
 
 /* ---------- Custom node ---------- */
@@ -175,6 +191,7 @@ function Sidebar({ onAdd }) {
 function Canvas() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [name, setName] = useState('');
   const wrapper = useRef(null);
   const nextId = useRef(100);
   const rf = useReactFlow();
@@ -217,6 +234,32 @@ function Canvas() {
     [rf, addNode]
   );
 
+  const exportPng = () => {
+    if (!nodes.length) return;
+    const width = 1600;
+    const height = 1000;
+    const rect = getRectOfNodes(nodes);
+    const [x, y, zoom] = getTransformForBounds(rect, width, height, 0.5, 2);
+    const fileName = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'cloudsketch-pipeline';
+    toPng(wrapper.current.querySelector('.react-flow__viewport'), {
+      backgroundColor: '#f8fafc',
+      width,
+      height,
+      style: { width: `${width}px`, height: `${height}px`, transform: `translate(${x}px, ${y}px) scale(${zoom})` },
+    }).then((url) => {
+      const a = document.createElement('a');
+      a.download = `${fileName}.png`;
+      a.href = url;
+      a.click();
+    });
+  };
+
+  const clearAll = () => {
+    if (!window.confirm('Remove every stage from the canvas?')) return;
+    setNodes([]);
+    setEdges([]);
+  };
+
   return (
     <div className="flex h-screen w-screen bg-slate-50 font-sans text-slate-900">
       <div className="relative min-w-0 flex-1" ref={wrapper}>
@@ -233,7 +276,35 @@ function Canvas() {
           defaultEdgeOptions={defaultEdgeOptions}
           deleteKeyCode={['Backspace', 'Delete']}
           fitView
-        />
+        >
+          <Panel position="top-left" className="flex items-center gap-2">
+            <Link to="/" className={`${btnGhost} no-underline`} aria-label="Back to home">
+              <ArrowLeft size={15} />
+            </Link>
+            <div className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5">
+              <input
+                className="w-44 bg-transparent text-[13px] font-semibold text-slate-900 focus:outline-none"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Pipeline name"
+                aria-label="Pipeline name"
+              />
+            </div>
+          </Panel>
+
+          <Panel position="top-right" className="flex gap-2">
+            <button className={btnPrimary} onClick={exportPng}>
+              <Download size={15} /> Export PNG
+            </button>
+            <button className={btnGhost} onClick={clearAll}>
+              <Trash2 size={15} /> Clear
+            </button>
+          </Panel>
+
+          <MiniMap pannable zoomable />
+          <Controls />
+          <Background gap={20} />
+        </ReactFlow>
       </div>
       <Sidebar onAdd={(kind) => addNode(kind)} />
     </div>
