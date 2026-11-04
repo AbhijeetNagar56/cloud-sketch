@@ -2,11 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { ArrowLeft, Copy, Pencil, Search, Trash2 } from 'lucide-react';
 
-/* Must match the values used in Architecture.jsx */
+/* Must match the values used in Architecture.jsx and Pipeline.jsx */
 const STORE_KEY = 'cloudsketch:projects';
+const PIPELINE_KEY = 'cloudsketch:pipelines';
 const DRAFT_KEY = 'cloudsketch:draft';
 const HOME_PATH = '/';
-const EDITOR_PATH = '/architecture'; // change to your editor route
 const NODE_W = 176;
 const NODE_H = 84;
 
@@ -21,7 +21,21 @@ const KIND_COLORS = {
   cdn: '#0d9488',
   gateway: '#4f46e5',
   auth: '#dc2626',
+  // pipeline stages
+  git: '#f05032',
+  build: '#d97706',
+  test: '#16a34a',
+  quality: '#0e7490',
+  security: '#b91c1c',
+  docker: '#0ea5e9',
+  registry: '#9333ea',
+  deploy: '#c2410c',
+  monitoring: '#65a30d',
+  notify: '#e11d48',
 };
+
+const isPipeline = (p) => p.type === 'pipeline';
+const editorPath = (p) => (isPipeline(p) ? '/pipeline' : '/architecture');
 
 const btn =
   'inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-[13px] font-semibold no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600';
@@ -104,7 +118,7 @@ const Saved = () => {
   const [query, setQuery] = useState('');
 
   useEffect(() => {
-    setProjects(read(STORE_KEY, []));
+    setProjects([...read(STORE_KEY, []), ...read(PIPELINE_KEY, [])]);
     setLoaded(true);
   }, []);
 
@@ -115,8 +129,11 @@ const Saved = () => {
       .filter((p) => !q || `${p.name} ${stackOf(p)}`.toLowerCase().includes(q));
   }, [projects, query]);
 
+  /* Split the list again: architecture diagrams and pipelines are kept in separate keys */
   const persist = (list) => {
-    if (!write(STORE_KEY, list)) {
+    const savedArch = write(STORE_KEY, list.filter((p) => !isPipeline(p)));
+    const savedPipes = write(PIPELINE_KEY, list.filter(isPipeline));
+    if (!savedArch || !savedPipes) {
       alert('Could not update saved projects: browser storage is full.');
       return false;
     }
@@ -198,7 +215,7 @@ const Saved = () => {
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {visible.map((p) => (
             <li key={p.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
-              <Link to={`${EDITOR_PATH}?project=${p.id}`} className="block border-b border-slate-200 bg-slate-50 p-3" aria-label={`Open ${p.name}`}>
+              <Link to={`${editorPath(p)}?project=${p.id}`} className="block border-b border-slate-200 bg-slate-50 p-3" aria-label={`Open ${p.name}`}>
                 <Preview nodes={p.nodes} edges={p.edges} />
               </Link>
               <div className="p-4">
@@ -207,10 +224,11 @@ const Saved = () => {
                 </h2>
                 <p className="mt-0.5 truncate text-[12.5px] text-slate-500">{stackOf(p) || 'No technologies'}</p>
                 <p className="mt-0.5 text-[12px] text-slate-400">
-                  {p.nodes.length} components · {formatTime(p.updatedAt)}
+                  {isPipeline(p) ? 'Pipeline' : 'Architecture'} · {p.nodes.length} {isPipeline(p) ? 'stages' : 'components'} ·{' '}
+                  {formatTime(p.updatedAt)}
                 </p>
                 <div className="mt-3 flex gap-2">
-                  <Link to={`${EDITOR_PATH}?project=${p.id}`} className={`${btnPrimary} flex-1`}>
+                  <Link to={`${editorPath(p)}?project=${p.id}`} className={`${btnPrimary} flex-1`}>
                     Open
                   </Link>
                   <button className={btnGhost} onClick={() => rename(p)} aria-label={`Rename ${p.name}`} title="Rename">
