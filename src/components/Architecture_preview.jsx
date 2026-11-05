@@ -1,4 +1,3 @@
-import React from 'react'
 import ReactFlow, { ReactFlowProvider, Background, BackgroundVariant, Handle, Position, MarkerType } from 'reactflow'
 import 'reactflow/dist/style.css'
 

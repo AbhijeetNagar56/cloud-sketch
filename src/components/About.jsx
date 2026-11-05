@@ -1,14 +1,11 @@
-import React from 'react'
 import { Link } from 'react-router'
 import {
   ArrowRight,
   Cloud,
   Code2,
   Compass,
-  Eye,
   GraduationCap,
   Layers3,
-  Lightbulb,
   Network,
   Rocket,
   Target,
@@ -19,29 +16,6 @@ import Navbar from './Navbar'
 import Footer from './Footer'
 import ArchitecturePreview from './Architecture_preview'
 
-const beliefs = [
-  {
-    icon: Lightbulb,
-    number: '01',
-    title: 'Simplicity',
-    description:
-      'Complex systems are easier to work with when the ideas behind them are easy to see.',
-  },
-  {
-    icon: Eye,
-    number: '02',
-    title: 'Clarity',
-    description:
-      'Every component and connection should help explain how a system fits together.',
-  },
-  {
-    icon: Target,
-    number: '03',
-    title: 'Better planning',
-    description:
-      'Taking time to think through an architecture gives development a clearer starting point.',
-  },
-]
 
 const capabilities = [
   {
@@ -92,28 +66,6 @@ const audiences = [
   },
 ]
 
-const approach = [
-  {
-    number: '01',
-    title: 'Think',
-    description: 'Start with the problem and understand what your system needs to do.',
-  },
-  {
-    number: '02',
-    title: 'Sketch',
-    description: 'Place the components your application depends on onto the canvas.',
-  },
-  {
-    number: '03',
-    title: 'Visualize',
-    description: 'Connect the pieces and see how the parts of your system relate.',
-  },
-  {
-    number: '04',
-    title: 'Build',
-    description: 'Use the diagram as a reference as you move into implementation.',
-  },
-]
 
 function SectionLabel({ children }) {
   return (
@@ -146,7 +98,7 @@ const About = () => {
                   to="/architecture"
                   className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
                 >
-                  Explore CloudSketch <ArrowRight size={16} />
+                  Create CloudSketch <ArrowRight size={16} />
                 </Link>
                 <a
                   href="#our-story"
@@ -312,12 +264,6 @@ const About = () => {
                 Bring your ideas together, organize your architecture, and start building with clarity.
               </p>
             </div>
-            <Link
-              to="/architecture"
-              className="inline-flex shrink-0 items-center gap-2 rounded-md bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
-            >
-              Explore CloudSketch <ArrowRight size={16} />
-            </Link>
             <Link
                 to="/"
                 className="rounded-lg border border-gray-600 px-6 py-3 font-semibold text-black transition  "
