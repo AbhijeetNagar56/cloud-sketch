@@ -46,3 +46,11 @@ npm run preview
 ## Built with
 
 React, Vite, React Flow, Tailwind CSS, lucide-react, and html-to-image.
+
+## Team Details
+
+- [Abhijith Kannan P](https://github.com/Abhijith-Kannan-p)
+- [Madhav Chandran](https://github.com/Madhav-Chandran-11)
+- [Abrar Hassan](https://github.com/abrar1202)
+- [Abhijeet Nagar](https://github.com/AbhijeetNagar56)
+- [Jenish Bhati](https://github.com/jenishdotdev)
