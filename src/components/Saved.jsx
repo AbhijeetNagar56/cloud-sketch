@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { ArrowLeft, Copy, Pencil, Search, Trash2 } from 'lucide-react';
 
-/* Must match the values used in Architecture.jsx and Pipeline.jsx */
 const STORE_KEY = 'cloudsketch:projects';
 const PIPELINE_KEY = 'cloudsketch:pipelines';
 const DRAFT_KEY = 'cloudsketch:draft';
@@ -21,7 +20,6 @@ const KIND_COLORS = {
   cdn: '#0d9488',
   gateway: '#4f46e5',
   auth: '#dc2626',
-  // pipeline stages
   git: '#f05032',
   build: '#d97706',
   test: '#16a34a',
@@ -62,7 +60,6 @@ const write = (key, value) => {
 
 const formatTime = (t) => new Date(t).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
 
-/* Small schematic of the saved diagram */
 function Preview({ nodes, edges }) {
   if (!nodes.length) {
     return <div className="grid h-36 place-items-center text-xs text-slate-400">Empty diagram</div>;
@@ -129,7 +126,6 @@ const Saved = () => {
       .filter((p) => !q || `${p.name} ${stackOf(p)}`.toLowerCase().includes(q));
   }, [projects, query]);
 
-  /* Split the list again: architecture diagrams and pipelines are kept in separate keys */
   const persist = (list) => {
     const savedArch = write(STORE_KEY, list.filter((p) => !isPipeline(p)));
     const savedPipes = write(PIPELINE_KEY, list.filter(isPipeline));
@@ -166,7 +162,7 @@ const Saved = () => {
         const sameName = (d.name || '').trim() === p.name;
         write(DRAFT_KEY, { ...d, name: sameName ? newName : d.name, savedSig: JSON.stringify(snapshot) });
       } catch {
-        /* draft has no valid snapshot */
+        // draft has no valid snapshot
       }
     }
   };
